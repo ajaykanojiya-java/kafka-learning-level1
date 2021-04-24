@@ -1,15 +1,17 @@
 package com.github.ajayonjava;
 
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-public class ProducerDemoCallback {
+public class ProducerDemoKeys {
 
-    private static Logger logger = LoggerFactory.getLogger(ProducerDemoCallback.class);
+    private static Logger logger = LoggerFactory.getLogger(ProducerDemoKeys.class);
 
     public static void main(String[] args) {
 
@@ -24,13 +26,20 @@ public class ProducerDemoCallback {
         KafkaProducer<String,String> producer = new KafkaProducer<String, String>(properties);
 
         //create producer record: what message to send
+
         for(int i=0;i<10;i++){
+            String topic = "first_topic";
+            String value = "Hello world "+Integer.toString(i);
+            String key = "id_"+Integer.toString(i);
+
             ProducerRecord<String,String> record =
-                    new ProducerRecord<>("first_topic","Hello World from Kafka Producer "+i);
+                    new ProducerRecord<>(topic,key,value);
 
             //send date - asynchronous
             producer.send(record, (recordMetadata, exception) ->{
                 if(exception==null){
+                    logger.info("Key: "+key); //log the key, key and its corresponding partition will be same when we
+                    //run this program multiple times
                     logger.info("Received new metadata \n");
                     logger.info("Topic: "+recordMetadata.topic()+"\n");
                     logger.info("Partition: "+recordMetadata.partition()+"\n");
